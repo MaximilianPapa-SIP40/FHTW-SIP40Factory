@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Workspace Name="SIP40Factory" Database="" Version="10.0.0">
+  <Project Name="MOR" Path="MOR/SIP40Factory_MOR_v3.project" Active="Yes"/>
+  <Project Name="Broker" Path="Broker/Broker.project" Active="No"/>
+  <Project Name="Station_RPiZeroW" Path="Station_RPiZeroW/Station_RPiZeroW.project" Active="No"/>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
+      <Environment/>
+      <Project Name="MOR" ConfigName="Debug"/>
+      <Project Name="MOR" ConfigName="Debug"/>
+      <Project Name="Broker" ConfigName="Debug"/>
+      <Project Name="Broker" ConfigName="Debug"/>
+      <Project Name="MOR" ConfigName="Debug"/>
+      <Project Name="Broker" ConfigName="Debug"/>
+      <Project Name="Station_RPiZeroW" ConfigName="Debug"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release" Selected="yes">
+      <Environment/>
+      <Project Name="MOR" ConfigName="Release"/>
+      <Project Name="MOR" ConfigName="Release"/>
+      <Project Name="Broker" ConfigName="Release"/>
+      <Project Name="Broker" ConfigName="Release"/>
+      <Project Name="MOR" ConfigName="Release"/>
+      <Project Name="Broker" ConfigName="Release"/>
+      <Project Name="Station_RPiZeroW" ConfigName="Release"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>

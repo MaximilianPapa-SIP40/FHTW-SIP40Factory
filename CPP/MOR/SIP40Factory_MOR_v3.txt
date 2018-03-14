@@ -1,0 +1,1 @@
+./Debug/AStarAlgorithm.cpp.o ./Debug/FactoryMap.cpp.o ./Debug/main.cpp.o ./Debug/TaskQueue.cpp.o ./Debug/MQTTCommunication.cpp.o ./Debug/MobileRobot.cpp.o

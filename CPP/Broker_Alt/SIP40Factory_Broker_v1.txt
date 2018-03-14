@@ -1,0 +1,1 @@
+./Debug/MosquittoMQTT_Communication.cpp.o ./Debug/AStarAlgorithm.cpp.o ./Debug/FactoryMap.cpp.o ./Debug/main.cpp.o ./Debug/TaskQueue.cpp.o
