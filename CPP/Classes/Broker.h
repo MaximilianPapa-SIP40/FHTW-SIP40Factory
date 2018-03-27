@@ -15,9 +15,9 @@ private:
 	static MQTTCommunication 		m_mqttComm;
 	static std::vector<uint8_t>		m_MORList;
 	
-	static bool InitStation(std::string topic, std::string stationID);
-	static bool InitMOR(std::string topic, std::string morID);
-	static bool SendNewTaskToStation(std::string topic, std::string value);
-	static bool AddTaskInMORQueue(std::string topic, std::string task);
-	static bool RemoveTaskFromMORQueue(std::string topic, std::string taskID);
+	static void InitStation(std::string topic, std::string stationID);
+	static void InitMOR(std::string topic, std::string morID);
+	static void SendNewTaskToStation(std::string topic, std::string value);
+	static void AddTaskInMORQueue(std::string topic, std::string task);
+	static void RemoveTaskFromMORQueue(std::string topic, std::string taskID);
 };

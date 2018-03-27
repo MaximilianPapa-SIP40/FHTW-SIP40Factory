@@ -13,7 +13,8 @@ Broker::Broker(const std::string mqttHostname, const int mqttPort)
 
 bool Broker::Run()
 {
-	if(m_mqttComm.Connect("192.168.1.25", 1883))
+	// @todo use the mqttHostname given from main
+	if(m_mqttComm.Connect("192.168.1.96", 1883))
 	{
 		//m_mqttComm.Subscribe("SIP40_Factory/MOR_General/GetInitTaskListFromRobot")
 		m_mqttComm.Subscribe("SIP40_Factory/Anmeldung/Station", InitStation);
@@ -26,18 +27,18 @@ bool Broker::Run()
 	}
 }
 
-bool Broker::InitStation(std::string topic, std::string stationID)
+void Broker::InitStation(std::string topic, std::string stationID)
 {
 	m_mqttComm.Publish("SIP40_Factory/" + stationID + "/TaskForStation", "1");
 	m_mqttComm.Subscribe("SIP40_Factory/" + stationID + "/NextTaskForMOR", AddTaskInMORQueue);
 	m_mqttComm.Subscribe("SIP40_Factory/" + stationID + "/TaskInProgress", SendNewTaskToStation);
-    std::cout << "Sent on: SIP40_Factory/" << stationID << "/TaskInProgress" << std::endl;
+    std::cout << "Sent on: SIP40_Factory/" << stationID << "/TaskForStation" << std::endl;
 }
 
-bool Broker::InitMOR(std::string topic, std::string morID)
+void Broker::InitMOR(std::string topic, std::string morID)
 {
-	morID = m_MORList.size();
-	m_MORList[stoi(morID)] = stoi(morID);
+	morID = std::to_string(m_MORList.size());
+	m_MORList.push_back(stoi(morID));
 	
 	m_mqttComm.Publish("SIP40_Factory/Anmeldung/MOR/Identity", morID);
     std::cout << "Gave MOR the identity: " << morID << std::endl;
@@ -47,12 +48,12 @@ bool Broker::InitMOR(std::string topic, std::string morID)
     std::cout << "Sent on: SIP40_Factory/MOR_General/TaskQueue" << std::endl;
 }
 
-bool Broker::SendNewTaskToStation(std::string topic, std::string value)
+void Broker::SendNewTaskToStation(std::string topic, std::string value)
 {
 	std::string stationName;
 	std::istringstream issTaskQueue(topic);
-	getline(issTaskQueue, stationName, ';');
-	getline(issTaskQueue, stationName, ';');
+	getline(issTaskQueue, stationName, '/');
+	getline(issTaskQueue, stationName, '/');
 			
 	if(value == "0")
 	{
@@ -61,13 +62,13 @@ bool Broker::SendNewTaskToStation(std::string topic, std::string value)
 	}
 }
 
-bool Broker::AddTaskInMORQueue(std::string topic, std::string task)
+void Broker::AddTaskInMORQueue(std::string topic, std::string task)
 {
 	m_TaskQueue.InsertNewTaskInQueueFromMQTTString(task);
 	m_mqttComm.Publish("SIP40_Factory/MOR_General/TaskQueue", m_TaskQueue.GetMQTTStringOfTaskQueue());
 }
 
-bool Broker::RemoveTaskFromMORQueue(std::string topic, std::string taskID)
+void Broker::RemoveTaskFromMORQueue(std::string topic, std::string taskID)
 {
 	std::cout << "Delete Task: " << std::endl;
 	m_TaskQueue.PrintTaskWithID(stoi(taskID));

@@ -163,14 +163,17 @@ std::string TaskQueue::GetMQTTStringOfTaskQueue() const
 		
 		for(size_t index = 0; index < m_TaskQueue.size(); index++)
 		{
-			mqttString 	+ to_string(m_TaskQueue[index].GetTaskID()) + "-" 
-						+ to_string(m_TaskQueue[index].GetTaskPriority()) + "-" 
-						+ to_string(m_TaskQueue[index].GetStartStationID()) + ">" 
-						+ to_string(m_TaskQueue[index].GetDestStationID());
+			mqttString.append(to_string(m_TaskQueue[index].GetTaskID()));
+			mqttString.append("-");
+			mqttString.append(to_string(m_TaskQueue[index].GetTaskPriority()));
+			mqttString.append("-");
+			mqttString.append(to_string(m_TaskQueue[index].GetStartStationID()));
+			mqttString.append(">");
+			mqttString.append(to_string(m_TaskQueue[index].GetDestStationID()));
 						
 			if(index < (m_TaskQueue.size() - 1))
 			{
-				mqttString + ";";
+				mqttString.append(";");
 			}
 		}
 		
