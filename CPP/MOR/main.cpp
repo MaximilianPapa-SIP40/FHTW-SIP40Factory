@@ -2,8 +2,7 @@
  * From : 	http://kevinboone.net/mosquitto-test.html
  * and : 	https://gist.github.com/evgeny-boger/8cefa502779f98efaf24
  */
-
-
+ 
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>

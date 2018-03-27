@@ -201,6 +201,8 @@ void MobileRobot::InitMOR(std::string topic, std::string identity)
 {
 	m_Identity = stoi(identity);
     std::cout << "MOR received the identity: " << m_Identity << std::endl;
+	
+	m_mqttComm.Unsubscribe("SIP40_Factory/Anmeldung/MOR/Identity");
 }
 
 void MobileRobot::RobotInStation(std::string topic, std::string value)
