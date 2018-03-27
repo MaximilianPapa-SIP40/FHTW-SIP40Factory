@@ -57,6 +57,7 @@ int main (int argc, char **argv)
 	}
 	
 	// MOR Run
+	// @todo: make a config file with all important infos for all devices like IP and so on
 	MobileRobot mor("192.168.1.96", 1883, factoryMap, "/dev/ttyACM0", 9600);
 	mor.Run();
 	

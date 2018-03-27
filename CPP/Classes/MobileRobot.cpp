@@ -108,15 +108,15 @@ bool MobileRobot::Run()
 					RobotInStationTopic = "SIP40_Factory/" + m_FactoryMap->GiveStationNameFromID(m_ActualTask.GetStartStationID()) + "/RobotInStation";
 					std::cout << RobotInStationTopic << std::endl;
 					
+					// Subscribe on topic
+					m_mqttComm.Subscribe(RobotInStationTopic, RobotInStation);
+					
 					// Publish the message to the topic
 					if (m_mqttComm.Publish(RobotInStationTopic, "1"))
 					{
 						fprintf (stderr, "Can't publish to Mosquitto server\n");
 						exit (-1);
 					}
-					
-					// Subscribe on topic
-					m_mqttComm.Subscribe(RobotInStationTopic, RobotInStation);
 					
 					std::cout << "Robot in Station!" << std::endl;
 					
@@ -181,15 +181,15 @@ bool MobileRobot::Run()
 					RobotInStationTopic = "SIP40_Factory/" + m_FactoryMap->GiveStationNameFromID(m_ActualTask.GetDestStationID()) + "/RobotInStation";
 					std::cout << RobotInStationTopic << std::endl;
 						
+					// Subscribe on topic
+					m_mqttComm.Subscribe(RobotInStationTopic, RobotInStation);
+					
 					// Publish the message to the topic
 					if (m_mqttComm.Publish(RobotInStationTopic, "1"))
 					{
 						fprintf (stderr, "Can't publish to Mosquitto server\n");
 						exit (-1);
 					}
-					
-					// Subscribe on topic
-					m_mqttComm.Subscribe(RobotInStationTopic, RobotInStation);
 					
 					std::cout << "Robot in Station!" << std::endl;
 					
