@@ -55,31 +55,31 @@ double AStarAlgorithm::CalculateHValue(int row, int col, Pair dest)
 
 // A Utility Function to trace the path from the source
 // to destination
-stack<pair<int, int>> AStarAlgorithm::TracePath(cell cellDetails[][COL], Pair dest)
+vector<pair<int, int>> AStarAlgorithm::TracePath(cell cellDetails[][COL], Pair dest)
 {
 	cout << endl << "The Path is ";
 	int row = dest.first;
 	int col = dest.second;
 
-	stack<Pair> Path;
-	stack<Pair> returnPath;
+	vector<Pair> Path;
+	vector<Pair> returnPath;
 
 	while (!(cellDetails[row][col].parent_i == row
 		&& cellDetails[row][col].parent_j == col))
 	{
-		Path.push(make_pair(row, col));
+		Path.push_back(make_pair(row, col));
 		int temp_row = cellDetails[row][col].parent_i;
 		int temp_col = cellDetails[row][col].parent_j;
 		row = temp_row;
 		col = temp_col;
 	}
 
-	Path.push(make_pair(row, col));
+	Path.push_back(make_pair(row, col));
 	returnPath = Path;
 	while (!Path.empty())
 	{
-		pair<int, int> p = Path.top();
-		Path.pop();
+		pair<int, int> p = Path.back();
+		Path.pop_back();
 		printf("-> (%d,%d) ", p.first, p.second);
 	}
 	
@@ -91,9 +91,9 @@ stack<pair<int, int>> AStarAlgorithm::TracePath(cell cellDetails[][COL], Pair de
 // A Function to find the shortest path between
 // a given source cell to a destination cell according
 // to A* Search Algorithm
-stack<pair<int, int>> AStarAlgorithm::AStarSearch(Pair src, Pair dest)
+vector<pair<int, int>> AStarAlgorithm::AStarSearch(Pair src, Pair dest)
 {
-	stack<pair<int, int>> emptyReturn;
+	vector<pair<int, int>> emptyReturn;
 	// If the source is out of range
 	if (IsValid(src.first, src.second) == false)
 	{

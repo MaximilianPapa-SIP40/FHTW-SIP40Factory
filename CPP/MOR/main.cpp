@@ -57,7 +57,8 @@ int main (int argc, char **argv)
 	}
 	
 	// MOR Run
-	MobileRobot mor("192.168.1.96", 1883, factoryMap, "/dev/ttyACM0", 9600);
+	MobileRobot::m_FactoryMap = &factoryMap;
+	MobileRobot mor("192.168.1.96", 1883, "/dev/ttyACM0", 9600);
 	mor.Run();
 	
 	return 0;

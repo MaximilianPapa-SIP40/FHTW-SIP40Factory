@@ -73,15 +73,20 @@ pair<int, int> FactoryMap::FindIDField(const int fieldID) const
 	return pair<int, int>(-1, -1);
 }
 
-stack<string> FactoryMap::CreateCommandsForRobot(stack<pair<int, int>> path) const 
+/*int FactoryMap::GetIDFromXYPosition(const int xPos, const int yPos) const
+{
+	return m_Map[xPos][yPos].fieldID;
+}*/
+
+stack<string> FactoryMap::CreateCommandsForRobot(vector<pair<int, int>> path) const 
 {
 	stack<string> tmp_commandPathToRobot;
-	pair<int, int> prevCoordinates = path.top();
+	pair<int, int> prevCoordinates = path.back();
 	
 	while (!path.empty())
 	{
-		pair<int, int> coordinates = path.top();
-		path.pop();
+		pair<int, int> coordinates = path.back();
+		path.pop_back();
 		
 		if((m_Map[coordinates.first][coordinates.second].fieldID - 10000) < 10000)
 		{
@@ -97,7 +102,7 @@ stack<string> FactoryMap::CreateCommandsForRobot(stack<pair<int, int>> path) con
 		else if((m_Map[coordinates.first][coordinates.second].fieldID - 20000) < 10000)
 		{
 			// Crossing on this position -> Check in which direction the robot should go next
-			pair<int, int> nextCoordinates = path.top();
+			pair<int, int> nextCoordinates = path.back();
 			pair<int, int> moveOne = make_pair((coordinates.first - prevCoordinates.first), (coordinates.second - prevCoordinates.second));
 			pair<int, int> moveTwo = make_pair((nextCoordinates.first - coordinates.first), (nextCoordinates.second - coordinates.second));
 			pair<int, int> moveAll = make_pair((moveOne.first + moveTwo.first), (moveOne.second + moveTwo.second));
@@ -176,4 +181,19 @@ stack<string> FactoryMap::CreateCommandsForRobot(stack<pair<int, int>> path) con
 bool FactoryMap::GetFieldFreeInformationOnPosition(const int row, const int column)
 {
 	return m_Map[row][column].fieldIsFree;
+}
+
+bool FactoryMap::BookField(const int xPos, const int yPos) const
+{
+	m_Map[xPos][yPos].fieldIsBooked = true;
+}
+
+bool FactoryMap::FreeField(const int xPos, const int yPos) const
+{
+	m_Map[xPos][yPos].fieldIsBooked = false;
+}
+
+bool FactoryMap::IsFieldBooked(const int xPos, const int yPos) const
+{
+	return m_Map[xPos][yPos].fieldIsBooked;
 }

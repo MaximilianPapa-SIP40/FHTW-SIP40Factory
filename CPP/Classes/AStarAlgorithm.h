@@ -37,7 +37,7 @@ public:
 	// A Function to find the shortest path between
 	// a given source cell to a destination cell according
 	// to A* Search Algorithm
-	std::stack<std::pair<int, int>> AStarSearch(Pair src, Pair dest);
+	std::vector<std::pair<int, int>> AStarSearch(Pair src, Pair dest);
 	
 private:
 	// A Utility Function to check whether given cell (row, col)
@@ -57,7 +57,7 @@ private:
 	
 	// A Utility Function to trace the path from the source
 	// to destination
-	std::stack<std::pair<int, int>> TracePath(cell cellDetails[][COL], Pair dest);
+	std::vector<std::pair<int, int>> TracePath(cell cellDetails[][COL], Pair dest);
 	
 	FactoryMap* m_FactoryMap;
 };

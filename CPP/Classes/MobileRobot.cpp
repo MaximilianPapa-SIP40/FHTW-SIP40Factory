@@ -4,17 +4,18 @@
 #include <wiringSerial.h>
 #include <string.h>
 #include <iostream>
+#include <sstream>
 
 uint16_t 			MobileRobot::m_Identity = -1;
 std::string 		MobileRobot::RobotInStationTopic = "";
 bool 				MobileRobot::stationHasFinished = false;
 TaskQueue 			MobileRobot::m_TaskQueue;
 MQTTCommunication 	MobileRobot::m_mqttComm;
+FactoryMap*			MobileRobot::m_FactoryMap = NULL;
 
-MobileRobot::MobileRobot(const std::string mqttHostname, const int mqttPort, FactoryMap& map, const std::string serialDevice, const int serialBaud) 
+MobileRobot::MobileRobot(const std::string mqttHostname, const int mqttPort, const std::string serialDevice, const int serialBaud) 
 	: m_SerialDevice(serialDevice)
 	, m_SerialBaud(serialBaud)
-	, m_FactoryMap(&map)
 	, m_StateMachineState(0)
 	, m_ActualPositionStationID(10004)
 	, m_RobotDrivesToStart(false)
@@ -33,6 +34,8 @@ bool MobileRobot::Run()
 	{
 		m_mqttComm.Subscribe("SIP40_Factory/MOR_General/TaskQueue", UpdateMORTaskQueue);
 		m_mqttComm.Subscribe("SIP40_Factory/Anmeldung/MOR/Identity", InitMOR);
+		m_mqttComm.Subscribe("SIP40_Factory/Factory/BookPath", Callback_BookPathInFactory);
+		m_mqttComm.Subscribe("SIP40_Factory/Factory/FreePath", Callback_FreePathInFactory);
 		
 		m_mqttComm.Publish("SIP40_Factory/Anmeldung/MOR", "1");
 		
@@ -73,34 +76,8 @@ bool MobileRobot::Run()
 				}
 				case 2:
 				{
-					std::stack<std::string> commandPathToRobot = m_FactoryMap->CreateCommandsForRobot(path);
-					std::cout << "Commands: " << std::endl;
-					while (!commandPathToRobot.empty())
-					{
-						std::string command = commandPathToRobot.top();
-						commandPathToRobot.pop();
-						std::cout << " --> " << command;
-						
-						serialPuts(m_SerialFileDescriptor, command.c_str());
-						
-						int dataAvailable;
-						while(1)
-						{ 
-							dataAvailable = serialDataAvail(m_SerialFileDescriptor);
-							if (dataAvailable > 0)
-							{
-								printf(" (Received: %i Character)\n", dataAvailable);
-								
-								if(serialGetchar(m_SerialFileDescriptor))
-								{
-									break;
-								}
-							}
-						}
-					}
-					
+					DriveAlongPath(path);
 					stateMachineState++;
-					
 					break;
 				}
 				case 3:
@@ -152,31 +129,7 @@ bool MobileRobot::Run()
 				}
 				case 6:
 				{
-					std::stack<std::string> commandPathToRobot = m_FactoryMap->CreateCommandsForRobot(path);
-					std::cout << "Commands: " << std::endl;
-					while (!commandPathToRobot.empty())
-					{
-						std::string command = commandPathToRobot.top();
-						commandPathToRobot.pop();
-						std::cout << " --> " << command;
-						
-						serialPuts(m_SerialFileDescriptor, command.c_str());
-						
-						int dataAvailable;
-						while(1)
-						{ 
-							dataAvailable = serialDataAvail(m_SerialFileDescriptor);
-							if (dataAvailable > 0)
-							{
-								printf(" (Received: %i Character)\n", dataAvailable);
-								
-								if(serialGetchar(m_SerialFileDescriptor))
-								{
-									break;
-								}
-							}
-						}
-					}
+					DriveAlongPath(path);
 					
 					RobotInStationTopic = "SIP40_Factory/" + m_FactoryMap->GiveStationNameFromID(m_ActualTask.GetDestStationID()) + "/RobotInStation";
 					std::cout << RobotInStationTopic << std::endl;
@@ -261,6 +214,38 @@ void MobileRobot::RobotInStation(std::string topic, std::string value)
 		RobotInStationTopic.clear();
 	}
 }
+
+void MobileRobot::Callback_BookPathInFactory(std::string topic, std::string path)
+{
+	std::string singleField;
+	std::istringstream issPath(path);
+	while (getline(issPath, singleField, '-'))
+	{
+		std::string xPos;
+		std::string yPos;
+		std::istringstream issSingleField(singleField);
+		getline(issSingleField, xPos, ':');
+		getline(issSingleField, yPos, ':');
+			
+		m_FactoryMap->BookField(std::stoi(xPos), std::stoi(yPos));
+	}
+}
+
+void MobileRobot::Callback_FreePathInFactory(std::string topic, std::string path)
+{
+	std::string singleField;
+	std::istringstream issPath(path);
+	while (getline(issPath, singleField, '-'))
+	{
+		std::string xPos;
+		std::string yPos;
+		std::istringstream issSingleField(singleField);
+		getline(issSingleField, xPos, ':');
+		getline(issSingleField, yPos, ':');
+			
+		m_FactoryMap->FreeField(std::stoi(xPos), std::stoi(yPos));
+	}
+}
     
 void MobileRobot::TakeTask(uint64_t taskID)
 {
@@ -272,4 +257,89 @@ void MobileRobot::TakeTask(uint64_t taskID)
 	std::cout << "MOR_" + std::to_string(m_Identity) + " takes the task with id: " + std::to_string(taskID) + " - ";
 	m_TaskQueue.PrintWayFromTaskWithID(m_ActualTask.GetTaskID());
 	m_TaskQueue.DeleteTaskWithID(m_ActualTask.GetTaskID());
+}
+
+bool MobileRobot::DriveAlongPath(const std::vector<std::pair<int, int>> path) const
+{
+	BookPath(path);
+	
+	std::stack<std::string> commandPathToRobot = m_FactoryMap->CreateCommandsForRobot(path);
+	std::cout << "Commands: " << std::endl;
+	while (!commandPathToRobot.empty())
+	{
+		std::string command = commandPathToRobot.top();
+		commandPathToRobot.pop();
+		std::cout << " --> " << command;
+		
+		serialPuts(m_SerialFileDescriptor, command.c_str());
+		
+		int dataAvailable;
+		while(1)
+		{ 
+			dataAvailable = serialDataAvail(m_SerialFileDescriptor);
+			if (dataAvailable > 0)
+			{
+				printf(" (Received: %i Character)\n", dataAvailable);
+				
+				if(serialGetchar(m_SerialFileDescriptor))
+				{
+					break;
+				}
+			}
+		}
+	}
+	
+	FreePath(path);
+}
+
+void MobileRobot::BookPath(const std::vector<std::pair<int, int>> path) const
+{
+	std::string pathString;
+	
+	std::cout << "Pfad blockieren: ";
+	
+	for(int index = 0; index < path.size(); index++)
+	{
+		pathString.append(std::to_string(path[index].first));
+		pathString.append(":");
+		pathString.append(std::to_string(path[index].second));
+		
+		if(m_FactoryMap->IsFieldBooked(path[index].first, path[index].second))
+		{
+			index = -1;
+			pathString.empty();
+		}
+		
+		if(index < (path.size() - 1))
+		{
+			pathString.append("-");
+		}
+	}
+	
+	std::cout << pathString << std::endl;
+	
+	m_mqttComm.Publish("SIP40_Factory/Factory/BookPath", pathString);
+}
+
+void MobileRobot::FreePath(const std::vector<std::pair<int, int>> path) const
+{
+	std::string pathString;
+	
+	std::cout << "Pfad freigeben: ";
+	
+	for(int index = 0; index < path.size(); index++)
+	{
+		pathString.append(std::to_string(path[index].first));
+		pathString.append(":");
+		pathString.append(std::to_string(path[index].second));
+		
+		if(index < (path.size() - 1))
+		{
+			pathString.append("-");
+		}
+	}
+	
+	std::cout << pathString << std::endl;
+	
+	m_mqttComm.Publish("SIP40_Factory/Factory/FreePath", pathString);
 }
