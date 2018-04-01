@@ -7,6 +7,8 @@ TaskQueue 				Broker::m_TaskQueue;
 std::vector<uint8_t>	Broker::m_MORList;
 
 Broker::Broker(const std::string mqttHostname, const int mqttPort)
+	: m_mqttHostname(mqttHostname)
+	, m_mqttPort(mqttPort)
 {
 	
 }
@@ -14,7 +16,7 @@ Broker::Broker(const std::string mqttHostname, const int mqttPort)
 bool Broker::Run()
 {
 	// @todo use the mqttHostname given from main
-	if(m_mqttComm.Connect("192.168.1.96", 1883))
+	if(m_mqttComm.Connect(m_mqttHostname, m_mqttPort))
 	{
 		//m_mqttComm.Subscribe("SIP40_Factory/MOR_General/GetInitTaskListFromRobot")
 		m_mqttComm.Subscribe("SIP40_Factory/Anmeldung/Station", InitStation);

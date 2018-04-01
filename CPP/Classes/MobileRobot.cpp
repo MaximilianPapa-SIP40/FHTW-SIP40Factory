@@ -21,6 +21,11 @@ MobileRobot::MobileRobot(const std::string mqttHostname, const int mqttPort, con
 	, m_StateMachineState(0)
 	, m_ActualPositionStationID(10004)
 	, m_RobotDrivesToStart(false)
+	, stationToggle(false)
+	, stateMachineState(0)
+	, lastBatteryInformationsSend(0)
+	, m_mqttHostname(mqttHostname)
+	, m_mqttPort(mqttPort)
 {
 	
 }
@@ -32,7 +37,7 @@ bool MobileRobot::Run()
 		return false;
 	}
 	
-	if(m_mqttComm.Connect("192.168.1.96", 1883))
+	if(m_mqttComm.Connect(m_mqttHostname, m_mqttPort))
 	{
 		m_mqttComm.Subscribe("SIP40_Factory/MOR_General/TaskQueue", UpdateMORTaskQueue);
 		m_mqttComm.Subscribe("SIP40_Factory/Anmeldung/MOR/Identity", InitMOR);

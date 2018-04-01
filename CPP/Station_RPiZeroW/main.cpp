@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "../Classes/MQTTCommunication.h"
+#include "../Classes/IniReader.h"
 
 // In folgender Zeile muss dem Stationsnamen eine Zahl zugewiesen werden
 const std::string StationName 			= "Station_1"; // kann auskommentieren, wenn mit dem RPi ein dynamischer Stationsname erstellt wird
@@ -32,7 +33,17 @@ void PrintInfos();
 
 int main(int argc, char **argv)
 {
-	MQTTCommunication mqttComm("192.168.1.25", 1883);
+	INIReader reader("../../SIP40.ini");
+
+    if (reader.ParseError() < 0) {
+        std::cout << "Can't load 'SIP40.ini'\n";
+        return 1;
+    }
+	
+	std::string mqtt_Hostname = reader.Get("Broker", "MQTT_Hostname", "UNKNOWN");
+	int mqtt_Port = reader.GetInteger("Broker", "MQTT_Port", -1);
+	
+	MQTTCommunication mqttComm(mqtt_Hostname, mqtt_Port);
 	
 	if(mqttComm.Connect())
 	{

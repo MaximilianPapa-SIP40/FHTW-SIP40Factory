@@ -14,26 +14,28 @@ public:
 	static FactoryMap* 		m_FactoryMap;
 	
 private:
-	Task m_ActualTask;
-	bool stationToggle = false;
-	uint8_t stateMachineState = 0;
-	uint64_t lastBatteryInformationsSend = 0;
-	std::vector<std::pair<int, int>> path;
-	int m_SerialFileDescriptor;
-	std::string m_SerialDevice;
-	int m_SerialBaud;
+	Task 								m_ActualTask;
+	bool 								stationToggle;
+	uint8_t 							stateMachineState;
+	uint64_t 							lastBatteryInformationsSend;
+	std::vector<std::pair<int, int>>	path;
+	uint8_t 							m_StateMachineState;
+	int 								m_ActualPositionStationID;
+	bool 								m_RobotDrivesToStart;
+	std::string 						m_mqttHostname;
+	int 								m_mqttPort;
 	
-	uint8_t 			m_StateMachineState;
-	int m_ActualPositionStationID;
-	bool m_RobotDrivesToStart;
+	int 			m_SerialFileDescriptor;
+	std::string 	m_SerialDevice;
+	int 			m_SerialBaud;
 	
-	static uint16_t 	m_Identity;
-	static std::string RobotInStationTopic;
-	static bool stationHasFinished;
-	static TaskQueue 	m_TaskQueue;
+	static uint16_t 			m_Identity;
+	static std::string 			RobotInStationTopic;
+	static bool 				stationHasFinished;
+	static TaskQueue 			m_TaskQueue;
 	static MQTTCommunication 	m_mqttComm;
-	static bool m_TaskAnswerArrived;
-	static bool m_TaskSuccessfullyTaken;
+	static bool 				m_TaskAnswerArrived;
+	static bool 				m_TaskSuccessfullyTaken;
 	
 	bool InitializeSerialConnection();
 	bool InitializeMQTTConnection();

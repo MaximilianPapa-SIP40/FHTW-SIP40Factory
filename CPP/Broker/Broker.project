@@ -15,6 +15,10 @@
     <File Name="../Classes/TaskQueue.cpp"/>
     <File Name="../Classes/TaskQueue.h"/>
     <File Name="main.cpp"/>
+    <File Name="../Classes/IniReader.cpp"/>
+    <File Name="../Classes/IniReader.h"/>
+    <File Name="../Classes/ini.c"/>
+    <File Name="../Classes/ini.h"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>

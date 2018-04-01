@@ -11,6 +11,9 @@ public:
 	bool Run();
 	
 private:
+	std::string 					m_mqttHostname;
+	int 							m_mqttPort;
+
 	static TaskQueue 				m_TaskQueue;
 	static MQTTCommunication 		m_mqttComm;
 	static std::vector<uint8_t>		m_MORList;

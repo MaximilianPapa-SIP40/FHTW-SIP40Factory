@@ -1,1 +1,1 @@
-./Debug/main.cpp.o ./Debug/up_Classes_MQTTCommunication.cpp.o
+./Debug/main.cpp.o ./Debug/up_Classes_MQTTCommunication.cpp.o ./Debug/up_Classes_IniReader.cpp.o ./Debug/up_Classes_ini.c.o
