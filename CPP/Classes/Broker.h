@@ -19,5 +19,5 @@ private:
 	static void InitMOR(std::string topic, std::string morID);
 	static void SendNewTaskToStation(std::string topic, std::string value);
 	static void AddTaskInMORQueue(std::string topic, std::string task);
-	static void RemoveTaskFromMORQueue(std::string topic, std::string taskID);
+	static void Callback_TakeTaskFromMOR(std::string topic, std::string taskID);
 };

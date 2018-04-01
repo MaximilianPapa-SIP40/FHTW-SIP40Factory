@@ -103,6 +103,19 @@ bool TaskQueue::DeleteTaskWithID(const int taskID)
 	return true;
 }
 
+bool TaskQueue::DoesTaskExist(const int taskID) const
+{
+	for(int index = 0; index < m_TaskQueue.size(); index++)
+	{
+		if(m_TaskQueue[index].GetTaskID() == taskID)
+		{
+			return true;
+		}
+	}
+	
+	return false;
+}
+
 bool TaskQueue::IsEmpty() const
 {
 	return m_TaskQueue.empty();

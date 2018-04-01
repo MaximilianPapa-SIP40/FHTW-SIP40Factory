@@ -45,6 +45,7 @@ public:
 	bool UpdatePriorityFromTaskWithID(const int taskID);
 	bool DeleteTaskWithID(const int taskID);
 	
+	bool DoesTaskExist(const int taskID) const;
 	bool IsEmpty() const;
 	
 	const std::vector<Task>* GetTaskQueue() const;

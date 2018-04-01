@@ -44,7 +44,7 @@ void Broker::InitMOR(std::string topic, std::string morID)
     std::cout << "Gave MOR the identity: " << morID << std::endl;
     
 	m_mqttComm.Publish("SIP40_Factory/MOR_General/TaskQueue", m_TaskQueue.GetMQTTStringOfTaskQueue());
-    m_mqttComm.Subscribe("SIP40_Factory/MOR_" + morID + "/TakeTask", RemoveTaskFromMORQueue);
+    m_mqttComm.Subscribe("SIP40_Factory/MOR_" + morID + "/TakeTask", Callback_TakeTaskFromMOR);
     std::cout << "Sent on: SIP40_Factory/MOR_General/TaskQueue" << std::endl;
 }
 
@@ -68,11 +68,28 @@ void Broker::AddTaskInMORQueue(std::string topic, std::string task)
 	m_mqttComm.Publish("SIP40_Factory/MOR_General/TaskQueue", m_TaskQueue.GetMQTTStringOfTaskQueue());
 }
 
-void Broker::RemoveTaskFromMORQueue(std::string topic, std::string taskID)
+void Broker::Callback_TakeTaskFromMOR(std::string topic, std::string taskID)
 {
-	std::cout << "Delete Task: " << std::endl;
-	m_TaskQueue.PrintTaskWithID(stoi(taskID));
-	m_TaskQueue.DeleteTaskWithID(stoi(taskID));
+	std::string morName;
+	std::istringstream issTopic(topic);
+	getline(issTopic, morName, '/');
+	getline(issTopic, morName, '/');
+		
+	if(m_TaskQueue.DoesTaskExist(stoi(taskID)))
+	{
+		std::cout << "Delete Task: " << std::endl;
+		m_TaskQueue.PrintTaskWithID(stoi(taskID));
+		m_TaskQueue.DeleteTaskWithID(stoi(taskID));
+		
+		m_mqttComm.Publish("SIP40_Factory/" + morName +"/TakeTaskAnswer", "TaskSuccessfullyTaken");
+	}
+	else
+	{
+		std::cout << "Task doesn't exist anymore! Maybe a other MOR took it already!" << std::endl;
+		
+		m_mqttComm.Publish("SIP40_Factory/" + morName +"/TakeTaskAnswer", "TaskNotTaken");
+	}
+	
 	m_TaskQueue.PrintWholeTaskQueue();
 	m_mqttComm.Publish("SIP40_Factory/MOR_General/TaskQueue", m_TaskQueue.GetMQTTStringOfTaskQueue());
 }
