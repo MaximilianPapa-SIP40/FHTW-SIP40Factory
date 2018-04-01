@@ -64,12 +64,20 @@ bool MobileRobot::Run()
 							std::cout << "MOR_" + std::to_string(m_Identity) + " takes the task with id: " + std::to_string(m_ActualTask.GetTaskID()) + " - ";
 							m_TaskQueue.PrintWayFromTaskWithID(m_ActualTask.GetTaskID());
 							stateMachineState++;
+							
+							// Has to be in both conditions, because of the receive thread --> Better: Try with Mutex
+							m_TaskAnswerArrived = false;
+							m_TaskSuccessfullyTaken = false;
 						}
 						else
 						{
 							std::cout << "Task doesn't exist anymore! Maybe a other MOR took it already!" << std::endl;
 							std::cout << "Wait to took another Task!" << std::endl;
 							stateMachineState--;
+							
+							// Has to be in both conditions, because of the receive thread  --> Better: Try with Mutex
+							m_TaskAnswerArrived = false;
+							m_TaskSuccessfullyTaken = false;
 						}
 					}
 					
