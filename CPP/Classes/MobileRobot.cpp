@@ -12,6 +12,8 @@ bool 				MobileRobot::stationHasFinished = false;
 TaskQueue 			MobileRobot::m_TaskQueue;
 MQTTCommunication 	MobileRobot::m_mqttComm;
 FactoryMap*			MobileRobot::m_FactoryMap = NULL;
+bool 				MobileRobot::m_TaskAnswerArrived = false;
+bool				MobileRobot::m_TaskSuccessfullyTaken = false;
 
 MobileRobot::MobileRobot(const std::string mqttHostname, const int mqttPort, const std::string serialDevice, const int serialBaud) 
 	: m_SerialDevice(serialDevice)
@@ -44,6 +46,7 @@ bool MobileRobot::Run()
 			switch (stateMachineState)
 			{
 				case 0:
+				{
 					if (!m_TaskQueue.IsEmpty()) 
 					{
 						m_ActualTask = m_TaskQueue.GetHighestPriorityTask();
@@ -51,7 +54,28 @@ bool MobileRobot::Run()
 						stateMachineState++;
 					}
 					break;
+				}
 				case 1:
+				{
+					if(m_TaskAnswerArrived)
+					{
+						if(m_TaskSuccessfullyTaken)
+						{
+							std::cout << "MOR_" + std::to_string(m_Identity) + " takes the task with id: " + std::to_string(m_ActualTask.GetTaskID()) + " - ";
+							m_TaskQueue.PrintWayFromTaskWithID(m_ActualTask.GetTaskID());
+							stateMachineState++;
+						}
+						else
+						{
+							std::cout << "Task doesn't exist anymore! Maybe a other MOR took it already!" << std::endl;
+							std::cout << "Wait to took another Task!" << std::endl;
+							stateMachineState--;
+						}
+					}
+					
+					break;
+				}
+				case 2:
 				{
 					if(m_ActualPositionStationID != m_ActualTask.GetStartStationID())
 					{
@@ -74,13 +98,13 @@ bool MobileRobot::Run()
 					stateMachineState++;
 					break;
 				}
-				case 2:
+				case 3:
 				{
 					DriveAlongPath(path);
 					stateMachineState++;
 					break;
 				}
-				case 3:
+				case 4:
 				{
 					RobotInStationTopic = "SIP40_Factory/" + m_FactoryMap->GiveStationNameFromID(m_ActualTask.GetStartStationID()) + "/RobotInStation";
 					std::cout << RobotInStationTopic << std::endl;
@@ -100,7 +124,7 @@ bool MobileRobot::Run()
 					stateMachineState++;
 					break;
 				}
-				case 4:
+				case 5:
 				{
 					if(stationHasFinished)
 					{
@@ -110,7 +134,7 @@ bool MobileRobot::Run()
 					}
 					break;
 				}
-				case 5:
+				case 6:
 				{
 					// Start Station
 					Pair src = m_FactoryMap->FindIDField(m_ActualTask.GetStartStationID());
@@ -127,7 +151,7 @@ bool MobileRobot::Run()
 					stateMachineState++;
 					break;
 				}
-				case 6:
+				case 7:
 				{
 					DriveAlongPath(path);
 					
@@ -150,7 +174,7 @@ bool MobileRobot::Run()
 					
 					break;
 				}
-				case 7:
+				case 8:
 				{
 					if(stationHasFinished)
 					{
@@ -202,6 +226,7 @@ void MobileRobot::InitMOR(std::string topic, std::string identity)
 	m_Identity = stoi(identity);
     std::cout << "MOR received the identity: " << m_Identity << std::endl;
 	
+	m_mqttComm.Subscribe("SIP40_Factory/MOR_" + std::to_string(m_Identity) + "/TakeTaskAnswer", Callback_TakeTask);	
 	m_mqttComm.Unsubscribe("SIP40_Factory/Anmeldung/MOR/Identity");
 }
 
@@ -248,6 +273,20 @@ void MobileRobot::Callback_FreePathInFactory(std::string topic, std::string path
 		m_FactoryMap->FreeField(std::stoi(xPos), std::stoi(yPos));
 	}
 }
+
+void MobileRobot::Callback_TakeTask(std::string topic, std::string answer)
+{
+	if(answer.compare("TaskSuccessfullyTaken") == 0)
+	{
+		m_TaskAnswerArrived = true;
+		m_TaskSuccessfullyTaken = true;
+	}
+	else if(answer.compare("TaskNotTaken") == 0)
+	{
+		m_TaskAnswerArrived = true;
+		m_TaskSuccessfullyTaken = false;
+	}
+}
     
 void MobileRobot::TakeTask(uint64_t taskID)
 {
@@ -256,9 +295,6 @@ void MobileRobot::TakeTask(uint64_t taskID)
 		fprintf (stderr, "Can't publish to Mosquitto server\n");
 		exit (-1);
 	}
-	std::cout << "MOR_" + std::to_string(m_Identity) + " takes the task with id: " + std::to_string(taskID) + " - ";
-	m_TaskQueue.PrintWayFromTaskWithID(m_ActualTask.GetTaskID());
-	m_TaskQueue.DeleteTaskWithID(m_ActualTask.GetTaskID());
 }
 
 bool MobileRobot::DriveAlongPath(const std::vector<std::pair<int, int>> path) const

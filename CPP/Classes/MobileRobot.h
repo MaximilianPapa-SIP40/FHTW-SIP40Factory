@@ -32,6 +32,8 @@ private:
 	static bool stationHasFinished;
 	static TaskQueue 	m_TaskQueue;
 	static MQTTCommunication 	m_mqttComm;
+	static bool m_TaskAnswerArrived;
+	static bool m_TaskSuccessfullyTaken;
 	
 	bool InitializeSerialConnection();
 	bool InitializeMQTTConnection();
@@ -50,4 +52,5 @@ private:
 	static void RobotInStation(std::string topic, std::string value);
 	static void Callback_BookPathInFactory(std::string topic, std::string path);
 	static void Callback_FreePathInFactory(std::string topic, std::string path);
+	static void Callback_TakeTask(std::string topic, std::string answer);
 };
