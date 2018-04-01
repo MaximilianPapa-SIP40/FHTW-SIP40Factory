@@ -245,7 +245,7 @@ void Callback_BookPathRequest(std::string topic, std::string path)
 	}
 	
 	// Falls alle Felder leer sind, dann pfad buchen und antwort schicken
-	m_mqttComm.Publish("SIP40_Factory/" + morName +"/TakeTaskAnswer", "TaskSuccessfullyTaken");
+	m_mqttComm.Publish("SIP40_Factory/" + morName +"/PathAnswerFromServer", "RequestAccepted");
 }
 
 void Callback_FreePathInFactory(std::string topic, std::string path)
@@ -300,6 +300,7 @@ bool TryToBookTempBookPathRequest()
 		
 		if(pathIsBookable)
 		{
+			m_mqttComm.Publish("SIP40_Factory/" + morID +"/PathAnswerFromServer", "RequestAccepted");
 			BookPath(path);
 			m_TempBookPathRequests.erase(it);
 		}
