@@ -8,8 +8,6 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="../Classes/Broker.cpp"/>
-    <File Name="../Classes/Broker.h"/>
     <File Name="../Classes/MQTTCommunication.cpp"/>
     <File Name="../Classes/MQTTCommunication.h"/>
     <File Name="../Classes/TaskQueue.cpp"/>
