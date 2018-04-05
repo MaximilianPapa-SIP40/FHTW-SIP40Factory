@@ -17,6 +17,8 @@
     <File Name="../Classes/IniReader.h"/>
     <File Name="../Classes/ini.c"/>
     <File Name="../Classes/ini.h"/>
+    <File Name="../Classes/FactoryMap.cpp"/>
+    <File Name="../Classes/FactoryMap.h"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>

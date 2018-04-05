@@ -36,6 +36,7 @@ private:
 	static MQTTCommunication 	m_mqttComm;
 	static bool 				m_TaskAnswerArrived;
 	static bool 				m_TaskSuccessfullyTaken;
+	static bool 				m_PathAnswerFromServer;
 	
 	bool InitializeSerialConnection();
 	bool InitializeMQTTConnection();
@@ -52,6 +53,7 @@ private:
 	static void UpdateMORTaskQueue(std::string topic, std::string taskQueue);
 	static void InitMOR(std::string topic, std::string identity);
 	static void RobotInStation(std::string topic, std::string value);
+	static void Callback_PathAnswerFromServer(std::string topic, std::string value);
 	static void Callback_BookPathInFactory(std::string topic, std::string path);
 	static void Callback_FreePathInFactory(std::string topic, std::string path);
 	static void Callback_TakeTask(std::string topic, std::string answer);

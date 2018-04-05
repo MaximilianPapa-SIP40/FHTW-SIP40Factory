@@ -14,6 +14,7 @@ MQTTCommunication 	MobileRobot::m_mqttComm;
 FactoryMap*			MobileRobot::m_FactoryMap = NULL;
 bool 				MobileRobot::m_TaskAnswerArrived = false;
 bool				MobileRobot::m_TaskSuccessfullyTaken = false;
+bool 				MobileRobot::m_PathAnswerFromServer = false;
 
 MobileRobot::MobileRobot(const std::string mqttHostname, const int mqttPort, const std::string serialDevice, const int serialBaud) 
 	: m_SerialDevice(serialDevice)
@@ -239,6 +240,7 @@ void MobileRobot::InitMOR(std::string topic, std::string identity)
 	m_Identity = stoi(identity);
     std::cout << "MOR received the identity: " << m_Identity << std::endl;
 	
+	m_mqttComm.Subscribe("SIP40_Factory/MOR_" + std::to_string(m_Identity) + "/PathAnswerFromServer", Callback_PathAnswerFromServer);
 	m_mqttComm.Subscribe("SIP40_Factory/MOR_" + std::to_string(m_Identity) + "/TakeTaskAnswer", Callback_TakeTask);	
 	m_mqttComm.Unsubscribe("SIP40_Factory/Anmeldung/MOR/Identity");
 }
@@ -255,8 +257,18 @@ void MobileRobot::RobotInStation(std::string topic, std::string value)
 	}
 }
 
+static void Callback_PathAnswerFromServer(std::string topic, std::string value);
+{
+	if(value == "RequestAccepted")
+	{
+		m_PathAnswerFromServer = true;
+	}
+}
+
 void MobileRobot::Callback_BookPathInFactory(std::string topic, std::string path)
 {
+	std::cout << "Empfangen: " << path << std::endl;
+	
 	std::string singleField;
 	std::istringstream issPath(path);
 	while (getline(issPath, singleField, '-'))
@@ -369,7 +381,11 @@ void MobileRobot::BookPath(const std::vector<std::pair<int, int>> path) const
 	
 	std::cout << pathString << std::endl;
 	
-	m_mqttComm.Publish("SIP40_Factory/Factory/BookPath", pathString);
+	m_mqttComm.Publish("SIP40_Factory/MOR_" + std::to_string(m_Identity) + "/BookPathRequest", pathString);
+	
+	// wait till path is booked on server
+	while(!m_PathAnswerFromServer);
+	m_PathAnswerFromServer = false;
 }
 
 void MobileRobot::FreePath(const std::vector<std::pair<int, int>> path) const

@@ -197,3 +197,32 @@ bool FactoryMap::IsFieldBooked(const int xPos, const int yPos) const
 {
 	return m_Map[xPos][yPos].fieldIsBooked;
 }
+
+std::string FactoryMap::GetAllBookedFieldsAsString() const
+{
+	std::string bookedFields = "";
+	
+	for(int row = 0; row < m_Rows; row++) 
+	{
+		for(int column = 0; column < m_Columns; column++) 
+		{
+			if(m_Map[row][column].fieldIsBooked == true)
+			{
+				bookedFields.append(to_string(row));
+				bookedFields.append(":");
+				bookedFields.append(to_string(column));
+				bookedFields.append("-");
+			}
+		}
+	}
+	
+	// Delete the last "-" of the bookedFields
+	bookedFields = bookedFields.substr(0, bookedFields.size()-1);
+	
+	if(bookedFields.empty())
+	{
+		return "NoFieldsBooked";
+	}
+	
+	return bookedFields;
+}

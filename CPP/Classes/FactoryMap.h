@@ -29,6 +29,7 @@ public:
 	bool BookField(const int xPos, const int yPos) const;
 	bool FreeField(const int xPos, const int yPos) const;
 	bool IsFieldBooked(const int xPos, const int yPos) const;
+	std::string GetAllBookedFieldsAsString() const;
 	
 private:
 	FactoryMapField** m_Map;

@@ -1,8 +1,10 @@
 #include "../Classes/TaskQueue.h"
 #include "../Classes/MQTTCommunication.h"
+#include "../Classes/FactoryMap.h"
 #include "../Classes/IniReader.h"
 #include <iostream>
 #include <sstream>
+#include <map>
 
 /*
  * Prototypes of the callback functions for the broker
@@ -12,16 +14,56 @@ void Callback_MORRegistration(std::string topic, std::string morID);
 void Callback_StationTaskInProgress(std::string topic, std::string value);
 void Callback_NextTaskForMor(std::string topic, std::string task);
 void Callback_TakeTaskFromMOR(std::string topic, std::string taskID);
+void Callback_BookPathRequest(std::string topic, std::string path);
+void Callback_FreePathInFactory(std::string topic, std::string path);
 
-TaskQueue 				m_TaskQueue;
-MQTTCommunication 		m_mqttComm;
-std::vector<uint8_t>	m_MORList;
+bool TryToBookTempBookPathRequest();
+bool BookPath(std::string path);
+
+TaskQueue 							m_TaskQueue;
+MQTTCommunication 					m_mqttComm;
+FactoryMap							m_FactoryMap(5, 5);
+std::vector<uint8_t>				m_MORList;
+std::map<std::string, std::string>	m_TempBookPathRequests;
 	
 /*
  * Entry point of the program
  */
 int main (int argc, char **argv)
-{	
+{		
+	/* Description of the Grid-
+	1--> The cell is not blocked
+	0--> The cell is blocked   
+	@ToDo: Automatisch erstellen lassen
+	*/
+	bool factoryMap_FreeWays[5][5] =
+	{
+		{ 1, 0, 1, 0, 1 },
+		{ 1, 0, 1, 0, 1 },
+		{ 1, 1, 1, 1, 1 },
+		{ 1, 0, 1, 0, 0 },
+		{ 1, 0, 1, 0, 0 }
+	};
+	
+	int factoryMap_IDs[5][5] =
+	{
+		{ 10001, 99999, 10000, 99999, 10002 },
+		{ 31010, 99999, 31010, 99999, 31010 },
+		{ 21110, 30101, 21111, 30101, 21100 },
+		{ 31010, 99999, 31010, 99999, 99999 },
+		{ 10003, 99999, 10004, 99999, 99999 }
+	};
+	
+	for(int row = 0; row < 5; row++) 
+	{
+		for(int column = 0; column < 5; column++) 
+		{
+			FactoryMapField field;
+			field.fieldIsFree = factoryMap_FreeWays[row][column];
+			field.fieldID = factoryMap_IDs[row][column];
+			m_FactoryMap.SetInMap(field, row, column);
+		}
+	}
 	
 	// Read the Ini-File
 	INIReader reader("../../SIP40.ini");
@@ -82,8 +124,17 @@ void Callback_MORRegistration(std::string topic, std::string morID)
     std::cout << "Gave MOR the identity: " << morID << std::endl;
     
 	m_mqttComm.Publish("SIP40_Factory/MOR_General/TaskQueue", m_TaskQueue.GetMQTTStringOfTaskQueue());
+	std::cout << "Sent on: SIP40_Factory/MOR_General/TaskQueue" << std::endl;
+	
+	if(m_FactoryMap.GetAllBookedFieldsAsString() != "NoFieldsBooked")
+	{
+		m_mqttComm.Publish("SIP40_Factory/Factory/BookPath", m_FactoryMap.GetAllBookedFieldsAsString());
+		std::cout << "Sent on: SIP40_Factory/Factory/BookPath" << std::endl;
+	}
+	
     m_mqttComm.Subscribe("SIP40_Factory/MOR_" + morID + "/TakeTask", Callback_TakeTaskFromMOR);
-    std::cout << "Sent on: SIP40_Factory/MOR_General/TaskQueue" << std::endl;
+	m_mqttComm.Subscribe("SIP40_Factory/MOR_" + morID + "/BookPathRequest", Callback_BookPathRequest);
+    
 }
 
 /**
@@ -160,4 +211,118 @@ void Callback_TakeTaskFromMOR(std::string topic, std::string taskID)
 	
 	m_TaskQueue.PrintWholeTaskQueue();
 	m_mqttComm.Publish("SIP40_Factory/MOR_General/TaskQueue", m_TaskQueue.GetMQTTStringOfTaskQueue());
+}
+
+void Callback_BookPathRequest(std::string topic, std::string path)
+{
+	bool pathIsBookable = true;
+	std::string morName;
+	std::istringstream issTopic(topic);
+	getline(issTopic, morName, '/');
+	getline(issTopic, morName, '/');
+	
+	std::string singleField;
+	std::istringstream issPath(path);
+	while (getline(issPath, singleField, '-'))
+	{
+		std::string xPos;
+		std::string yPos;
+		std::istringstream issSingleField(singleField);
+		getline(issSingleField, xPos, ':');
+		getline(issSingleField, yPos, ':');
+		
+		if(!m_FactoryMap.IsFieldBooked(std::stoi(xPos), std::stoi(yPos)))
+		{
+			m_TempBookPathRequests.insert(std::make_pair(morName, path));
+			pathIsBookable = false;
+			break;
+		}
+	}
+	
+	if(pathIsBookable)
+	{
+		BookPath(path);
+	}
+	
+	// Falls alle Felder leer sind, dann pfad buchen und antwort schicken
+	m_mqttComm.Publish("SIP40_Factory/" + morName +"/TakeTaskAnswer", "TaskSuccessfullyTaken");
+}
+
+void Callback_FreePathInFactory(std::string topic, std::string path)
+{
+	std::string singleField;
+	std::istringstream issPath(path);
+	while (getline(issPath, singleField, '-'))
+	{
+		std::string xPos;
+		std::string yPos;
+		std::istringstream issSingleField(singleField);
+		getline(issSingleField, xPos, ':');
+		getline(issSingleField, yPos, ':');
+			
+		m_FactoryMap.FreeField(std::stoi(xPos), std::stoi(yPos));
+	}
+	
+	TryToBookTempBookPathRequest();
+}
+
+bool TryToBookTempBookPathRequest()
+{
+	// Create a map iterator and point to beginning of map
+	std::map<std::string, std::string>::iterator it = m_TempBookPathRequests.begin();
+	
+	// Iterate over the m_TempBookPathRequests-map using Iterator till end.
+	while (it != m_TempBookPathRequests.end())
+	{
+		// Accessing morID from element pointed by it.
+		std::string morID = it->first;
+ 
+		// Accessing path from element pointed by it.
+		std::string path = it->second;
+		
+		bool pathIsBookable = true;
+		std::string singleField;
+		std::istringstream issPath(path);
+		while (getline(issPath, singleField, '-'))
+		{
+			std::string xPos;
+			std::string yPos;
+			std::istringstream issSingleField(singleField);
+			getline(issSingleField, xPos, ':');
+			getline(issSingleField, yPos, ':');
+			
+			if(!m_FactoryMap.IsFieldBooked(std::stoi(xPos), std::stoi(yPos)))
+			{
+				pathIsBookable = false;
+				break;
+			}
+		}
+		
+		if(pathIsBookable)
+		{
+			BookPath(path);
+			m_TempBookPathRequests.erase(it);
+		}
+ 
+		// Increment the Iterator to point to next entry
+		it++;
+	}
+}
+
+bool BookPath(std::string path)
+{
+	std::string singleField;
+	std::istringstream issPath(path);
+	while (getline(issPath, singleField, '-'))
+	{
+		std::string xPos;
+		std::string yPos;
+		std::istringstream issSingleField(singleField);
+		getline(issSingleField, xPos, ':');
+		getline(issSingleField, yPos, ':');
+			
+		m_FactoryMap.BookField(std::stoi(xPos), std::stoi(yPos));
+	}
+	
+	m_mqttComm.Publish("SIP40_Factory/Factory/BookPathInFactory", path);
 }
