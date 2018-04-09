@@ -361,19 +361,13 @@ void MobileRobot::BookPath(const std::vector<std::pair<int, int>> path) const
 	
 	std::cout << "Pfad blockieren: ";
 	
-	for(int index = 0; index < path.size(); index++)
+	for(int index = 0; index < (path.size() - 1); index++)
 	{
 		pathString.append(std::to_string(path[index].first));
 		pathString.append(":");
 		pathString.append(std::to_string(path[index].second));
 		
-		if(m_FactoryMap->IsFieldBooked(path[index].first, path[index].second))
-		{
-			index = -1;
-			pathString.empty();
-		}
-		
-		if(index < (path.size() - 1))
+		if(index < (path.size() - 2))
 		{
 			pathString.append("-");
 		}
@@ -394,7 +388,7 @@ void MobileRobot::FreePath(const std::vector<std::pair<int, int>> path) const
 	
 	std::cout << "Pfad freigeben: ";
 	
-	for(int index = 0; index < path.size(); index++)
+	for(int index = 1; index < path.size(); index++)
 	{
 		pathString.append(std::to_string(path[index].first));
 		pathString.append(":");
