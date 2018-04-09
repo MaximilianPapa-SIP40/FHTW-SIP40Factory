@@ -257,7 +257,7 @@ void MobileRobot::RobotInStation(std::string topic, std::string value)
 	}
 }
 
-static void Callback_PathAnswerFromServer(std::string topic, std::string value);
+void MobileRobot::Callback_PathAnswerFromServer(std::string topic, std::string value)
 {
 	if(value == "RequestAccepted")
 	{

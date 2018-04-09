@@ -1,8 +1,8 @@
 .PHONY: clean All
 
 All:
-	@echo "----------Building project:[ Broker - Debug ]----------"
-	@cd "Broker" && "$(MAKE)" -f  "Broker.mk"
+	@echo "----------Building project:[ MOR - Debug ]----------"
+	@cd "MOR" && "$(MAKE)" -f  "MOR.mk"
 clean:
-	@echo "----------Cleaning project:[ Broker - Debug ]----------"
-	@cd "Broker" && "$(MAKE)" -f  "Broker.mk" clean
+	@echo "----------Cleaning project:[ MOR - Debug ]----------"
+	@cd "MOR" && "$(MAKE)" -f  "MOR.mk" clean

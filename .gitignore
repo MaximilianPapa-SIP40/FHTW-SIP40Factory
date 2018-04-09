@@ -12,3 +12,5 @@
 *lib
 *.mk
 *.workspace.session
+*.codelite
+*Makefile
