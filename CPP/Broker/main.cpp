@@ -79,6 +79,7 @@ int main (int argc, char **argv)
 		//m_mqttComm.Subscribe("SIP40_Factory/MOR_General/GetInitTaskListFromRobot")
 		m_mqttComm.Subscribe("SIP40_Factory/Anmeldung/Station", Callback_StationRegistration);
 		m_mqttComm.Subscribe("SIP40_Factory/Anmeldung/MOR", Callback_MORRegistration);
+		m_mqttComm.Subscribe("SIP40_Factory/Factory/FreePath", Callback_FreePathInFactory);
 		
 		while(1)
 		{
@@ -231,8 +232,10 @@ void Callback_BookPathRequest(std::string topic, std::string path)
 		getline(issSingleField, xPos, ':');
 		getline(issSingleField, yPos, ':');
 		
-		if(!m_FactoryMap.IsFieldBooked(std::stoi(xPos), std::stoi(yPos)))
+		if(m_FactoryMap.IsFieldBooked(std::stoi(xPos), std::stoi(yPos)))
 		{
+			std::cout << "Pfad war nicht frei, es wird gewartet bis er frei wird!" << std::endl;
+			std::cout << xPos << ":" << yPos << std::endl;
 			m_TempBookPathRequests.insert(std::make_pair(morName, path));
 			pathIsBookable = false;
 			break;
@@ -241,11 +244,11 @@ void Callback_BookPathRequest(std::string topic, std::string path)
 	
 	if(pathIsBookable)
 	{
+		// Falls alle Felder leer sind, dann pfad buchen und antwort schicken
+		m_mqttComm.Publish("SIP40_Factory/" + morName +"/PathAnswerFromServer", "RequestAccepted");
+		std::cout << "Pfad ist frei und wird dem Roboter gemeldet!" << std::endl;
 		BookPath(path);
 	}
-	
-	// Falls alle Felder leer sind, dann pfad buchen und antwort schicken
-	m_mqttComm.Publish("SIP40_Factory/" + morName +"/PathAnswerFromServer", "RequestAccepted");
 }
 
 void Callback_FreePathInFactory(std::string topic, std::string path)
@@ -262,6 +265,8 @@ void Callback_FreePathInFactory(std::string topic, std::string path)
 			
 		m_FactoryMap.FreeField(std::stoi(xPos), std::stoi(yPos));
 	}
+	
+	std::cout << "Path released!" << std::endl;
 	
 	TryToBookTempBookPathRequest();
 }
@@ -291,7 +296,7 @@ bool TryToBookTempBookPathRequest()
 			getline(issSingleField, xPos, ':');
 			getline(issSingleField, yPos, ':');
 			
-			if(!m_FactoryMap.IsFieldBooked(std::stoi(xPos), std::stoi(yPos)))
+			if(m_FactoryMap.IsFieldBooked(std::stoi(xPos), std::stoi(yPos)))
 			{
 				pathIsBookable = false;
 				break;
@@ -300,9 +305,11 @@ bool TryToBookTempBookPathRequest()
 		
 		if(pathIsBookable)
 		{
+			std::cout << "Path is now free --> Answer the right mor" << std::endl;
 			m_mqttComm.Publish("SIP40_Factory/" + morID +"/PathAnswerFromServer", "RequestAccepted");
 			BookPath(path);
 			m_TempBookPathRequests.erase(it);
+			break;
 		}
  
 		// Increment the Iterator to point to next entry
@@ -326,4 +333,5 @@ bool BookPath(std::string path)
 	}
 	
 	m_mqttComm.Publish("SIP40_Factory/Factory/BookPathInFactory", path);
+	std::cout << "Path booked: " << path << std::endl;
 }
