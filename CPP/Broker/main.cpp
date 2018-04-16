@@ -4,6 +4,7 @@
 #include "../Classes/IniReader.h"
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <map>
 
 /*
@@ -22,7 +23,7 @@ bool BookPath(std::string path);
 
 TaskQueue 							m_TaskQueue;
 MQTTCommunication 					m_mqttComm;
-FactoryMap							m_FactoryMap(5, 5);
+FactoryMap							m_FactoryMap(11, 13);
 std::vector<uint8_t>				m_MORList;
 std::map<std::string, std::string>	m_TempBookPathRequests;
 	
@@ -36,27 +37,46 @@ int main (int argc, char **argv)
 	0--> The cell is blocked   
 	@ToDo: Automatisch erstellen lassen
 	*/
-	bool factoryMap_FreeWays[5][5] =
+	bool factoryMap_FreeWays[11][13] =
 	{
-		{ 1, 0, 1, 0, 1 },
-		{ 1, 0, 1, 0, 1 },
-		{ 1, 1, 1, 1, 1 },
-		{ 1, 0, 1, 0, 0 },
-		{ 1, 0, 1, 0, 0 }
+		{ 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0 },
+		{ 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0 },
+		{ 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0 },
+		{ 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1 },
+		{ 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1 },
+		{ 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
 	};
 	
-	int factoryMap_IDs[5][5] =
-	{
-		{ 10001, 99999, 10000, 99999, 10002 },
-		{ 31010, 99999, 31010, 99999, 31010 },
-		{ 21110, 30101, 21111, 30101, 21100 },
-		{ 31010, 99999, 31010, 99999, 99999 },
-		{ 10003, 99999, 10004, 99999, 99999 }
-	};
+	int factoryMap_IDs[11][13];
 	
-	for(int row = 0; row < 5; row++) 
+	std::string factoryMapLine;
+	std::ifstream factoryMapFile ("../../FactoryMap.txt");
+	if(factoryMapFile.is_open())
 	{
-		for(int column = 0; column < 5; column++) 
+		for(int row = 0; getline(factoryMapFile,factoryMapLine); row++)
+		{
+			std::string mapPosID;
+			std::istringstream issMapLine(factoryMapLine);
+			for(int column = 0; getline(issMapLine, mapPosID, '-'); column++)
+			{
+				factoryMap_IDs[row][column] = std::stoi(mapPosID);
+			}
+		}
+		factoryMapFile.close();
+	}
+	else
+	{
+		std::cout << "Unable to open FactoryMap-File"; 
+	}
+	
+	for(int row = 0; row < 11; row++) 
+	{
+		for(int column = 0; column < 13; column++) 
 		{
 			FactoryMapField field;
 			field.fieldIsFree = factoryMap_FreeWays[row][column];
