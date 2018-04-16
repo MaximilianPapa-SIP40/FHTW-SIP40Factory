@@ -15,6 +15,7 @@ FactoryMap*			MobileRobot::m_FactoryMap = NULL;
 bool 				MobileRobot::m_TaskAnswerArrived = false;
 bool				MobileRobot::m_TaskSuccessfullyTaken = false;
 bool 				MobileRobot::m_PathAnswerFromServer = false;
+bool 				MobileRobot::m_MorIsInitialized = false;
 
 MobileRobot::MobileRobot(const std::string mqttHostname, const int mqttPort, const std::string serialDevice, const int serialBaud) 
 	: m_SerialDevice(serialDevice)
@@ -46,6 +47,9 @@ bool MobileRobot::Run()
 		m_mqttComm.Subscribe("SIP40_Factory/Factory/FreePath", Callback_FreePathInFactory);
 		
 		m_mqttComm.Publish("SIP40_Factory/Anmeldung/MOR", "1");
+		
+		// Wait till mobile robot is initialized, before he starts
+		while(!m_MorIsInitialized);
 		
 		while(1)
 		{				
@@ -238,6 +242,7 @@ void MobileRobot::UpdateMORTaskQueue(std::string topic, std::string taskQueue)
 void MobileRobot::InitMOR(std::string topic, std::string identity)
 {
 	m_Identity = stoi(identity);
+	m_MorIsInitialized = true;
     std::cout << "MOR received the identity: " << m_Identity << std::endl;
 	
 	m_mqttComm.Subscribe("SIP40_Factory/MOR_" + std::to_string(m_Identity) + "/PathAnswerFromServer", Callback_PathAnswerFromServer);

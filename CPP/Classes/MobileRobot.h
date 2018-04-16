@@ -37,6 +37,7 @@ private:
 	static bool 				m_TaskAnswerArrived;
 	static bool 				m_TaskSuccessfullyTaken;
 	static bool 				m_PathAnswerFromServer;
+	static bool 				m_MorIsInitialized;
 	
 	bool InitializeSerialConnection();
 	bool InitializeMQTTConnection();
