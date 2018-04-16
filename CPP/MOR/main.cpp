@@ -10,6 +10,7 @@
 #include <sstream>
 #include <iostream>
 #include <unistd.h>
+#include <fstream>
 
 #include "../Classes/MobileRobot.h"
 #include "../Classes/FactoryMap.h"
@@ -36,14 +37,27 @@ int main (int argc, char **argv)
 		{ 1, 0, 1, 0, 0 }
 	};
 	
-	int factoryMap_IDs[5][5] =
+	int factoryMap_IDs[5][5];
+	
+	std::string factoryMapLine;
+	std::ifstream factoryMapFile ("../../FactoryMap.txt");
+	if(factoryMapFile.is_open())
 	{
-		{ 10001, 99999, 10000, 99999, 10002 },
-		{ 31010, 99999, 31010, 99999, 31010 },
-		{ 21110, 30101, 21111, 30101, 21100 },
-		{ 31010, 99999, 31010, 99999, 99999 },
-		{ 10003, 99999, 10004, 99999, 99999 }
-	};
+		for(int row = 0; getline(factoryMapFile,factoryMapLine); row++)
+		{
+			std::string mapPosID;
+			std::istringstream issMapLine(factoryMapLine);
+			for(int column = 0; getline(issMapLine, mapPosID, '-'); column++)
+			{
+				factoryMap_IDs[row][column] = std::stoi(mapPosID);
+			}
+		}
+		factoryMapFile.close();
+	}
+	else
+	{
+		std::cout << "Unable to open FactoryMap-File"; 
+	}
 	
 	for(int row = 0; row < 5; row++) 
 	{
