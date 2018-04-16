@@ -21,7 +21,7 @@ MobileRobot::MobileRobot(const std::string mqttHostname, const int mqttPort, con
 	: m_SerialDevice(serialDevice)
 	, m_SerialBaud(serialBaud)
 	, m_StateMachineState(0)
-	, m_ActualPositionStationID(10004)
+	, m_ActualPositionStationID(10021)
 	, m_RobotDrivesToStart(false)
 	, stationToggle(false)
 	, stateMachineState(0)
