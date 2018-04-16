@@ -42,11 +42,12 @@ private:
 	bool InitializeSerialConnection();
 	bool InitializeMQTTConnection();
 	
-	bool DriveAlongPath(const std::vector<std::pair<int, int>> path) const;
+	bool DriveAlongPath(std::vector<std::pair<int, int>> path) const;
 		
 	void TakeTask(uint64_t taskID);
 	void BookPath(const std::vector<std::pair<int, int>> path) const;
 	void FreePath(const std::vector<std::pair<int, int>> path) const;
+	void FreePathAfterCheckpoint(std::vector<std::pair<int, int>>& path) const;
 
 	/*
 	 * MQTT-Callback Methods

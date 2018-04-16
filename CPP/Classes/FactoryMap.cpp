@@ -73,10 +73,10 @@ pair<int, int> FactoryMap::FindIDField(const int fieldID) const
 	return pair<int, int>(-1, -1);
 }
 
-/*int FactoryMap::GetIDFromXYPosition(const int xPos, const int yPos) const
+int FactoryMap::GetIDFromXYPosition(const int xPos, const int yPos) const
 {
 	return m_Map[xPos][yPos].fieldID;
-}*/
+}
 
 stack<string> FactoryMap::CreateCommandsForRobot(vector<pair<int, int>> path) const 
 {

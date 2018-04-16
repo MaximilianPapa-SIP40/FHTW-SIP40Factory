@@ -327,8 +327,9 @@ void MobileRobot::TakeTask(uint64_t taskID)
 	}
 }
 
-bool MobileRobot::DriveAlongPath(const std::vector<std::pair<int, int>> path) const
+bool MobileRobot::DriveAlongPath(std::vector<std::pair<int, int>> path) const
 {
+	
 	BookPath(path);
 	
 	std::stack<std::string> commandPathToRobot = m_FactoryMap->CreateCommandsForRobot(path);
@@ -355,9 +356,9 @@ bool MobileRobot::DriveAlongPath(const std::vector<std::pair<int, int>> path) co
 				}
 			}
 		}
+		
+		FreePathAfterCheckpoint(path);
 	}
-	
-	FreePath(path);
 }
 
 void MobileRobot::BookPath(const std::vector<std::pair<int, int>> path) const
@@ -407,5 +408,33 @@ void MobileRobot::FreePath(const std::vector<std::pair<int, int>> path) const
 	
 	std::cout << pathString << std::endl;
 	
+	m_mqttComm.Publish("SIP40_Factory/Factory/FreePath", pathString);
+}
+
+void MobileRobot::FreePathAfterCheckpoint(std::vector<std::pair<int, int>>& path) const
+{
+	std::string pathString;
+		
+	for(int index = (path.size() - 1); index > 0; index--)
+	{
+		int xPos = path[index].first;
+		int yPos = path[index].second;
+		path.pop_back();
+		
+		if(!pathString.empty())
+		{
+			pathString.append("-");
+		}
+		pathString.append(std::to_string(xPos));
+		pathString.append(":");
+		pathString.append(std::to_string(yPos));
+		
+		if((m_FactoryMap->GetIDFromXYPosition(xPos, yPos) - 20000) < 10000)
+		{
+			break;
+		}
+	}
+	
+	std::cout << "Pfad freigeben: " << pathString << std::endl;
 	m_mqttComm.Publish("SIP40_Factory/Factory/FreePath", pathString);
 }

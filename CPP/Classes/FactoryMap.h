@@ -22,7 +22,7 @@ public:
 	void PrintMap() const;
 	std::string GiveStationNameFromID(const int stationID) const;
 	std::pair<int, int> FindIDField(const int fieldID) const;
-	//int GetIDFromXYPosition(const int xPos, const int yPos) const;
+	int GetIDFromXYPosition(const int xPos, const int yPos) const;
 	std::stack<std::string> CreateCommandsForRobot(std::vector<std::pair<int, int>> path) const;
 	bool GetFieldFreeInformationOnPosition(const int row, const int column);
 	
