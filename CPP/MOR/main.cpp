@@ -65,9 +65,9 @@ int main (int argc, char **argv)
 		std::cout << "Unable to open FactoryMap-File"; 
 	}
 	
-	for(int row = 0; row < 5; row++) 
+	for(int row = 0; row < 11; row++) 
 	{
-		for(int column = 0; column < 5; column++) 
+		for(int column = 0; column < 13; column++) 
 		{
 			FactoryMapField field;
 			field.fieldIsFree = factoryMap_FreeWays[row][column];

@@ -308,13 +308,13 @@ void MobileRobot::Callback_TakeTask(std::string topic, std::string answer)
 {
 	if(answer.compare("TaskSuccessfullyTaken") == 0)
 	{
-		m_TaskAnswerArrived = true;
 		m_TaskSuccessfullyTaken = true;
+		m_TaskAnswerArrived = true;
 	}
 	else if(answer.compare("TaskNotTaken") == 0)
 	{
-		m_TaskAnswerArrived = true;
 		m_TaskSuccessfullyTaken = false;
+		m_TaskAnswerArrived = true;
 	}
 }
     
