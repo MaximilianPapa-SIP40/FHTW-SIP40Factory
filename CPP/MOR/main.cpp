@@ -21,23 +21,29 @@
  */
 int main (int argc, char **argv)
 {	
-	FactoryMap factoryMap(5, 5);
+	FactoryMap factoryMap(11, 13);
 	
 	/* Description of the Grid-
 	1--> The cell is not blocked
 	0--> The cell is blocked   
 	@ToDo: Automatisch erstellen lassen
 	*/
-	bool factoryMap_FreeWays[5][5] =
+	bool factoryMap_FreeWays[11][13] =
 	{
-		{ 1, 0, 1, 0, 1 },
-		{ 1, 0, 1, 0, 1 },
-		{ 1, 1, 1, 1, 1 },
-		{ 1, 0, 1, 0, 0 },
-		{ 1, 0, 1, 0, 0 }
+		{ 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0 },
+		{ 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0 },
+		{ 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0 },
+		{ 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1 },
+		{ 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1 },
+		{ 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
 	};
 	
-	int factoryMap_IDs[5][5];
+	int factoryMap_IDs[11][13];
 	
 	std::string factoryMapLine;
 	std::ifstream factoryMapFile ("../../FactoryMap.txt");
