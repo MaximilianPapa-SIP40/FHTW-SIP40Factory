@@ -157,6 +157,13 @@ stack<string> FactoryMap::CreateCommandsForRobot(vector<pair<int, int>> path) co
 			// Save the previous coordinates, if the next field is a crossing
 			prevCoordinates = coordinates;
 		}
+		else if((m_Map[coordinates.first][coordinates.second].fieldID - 40000) < 10000)
+		{
+			// cooperative road on this position
+			// Do nothing -> Let the robot drive till next crossing or station
+			// Save the previous coordinates, if the next field is a crossing
+			prevCoordinates = coordinates;
+		}
 		else if((m_Map[coordinates.first][coordinates.second].fieldID - 99999) < 0)
 		{
 			cout << "Error: Path planning gone wrong!";
