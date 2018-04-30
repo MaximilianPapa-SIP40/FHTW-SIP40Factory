@@ -23,7 +23,7 @@ bool BookPath(std::string path);
 
 TaskQueue 							m_TaskQueue;
 MQTTCommunication 					m_mqttComm;
-FactoryMap							m_FactoryMap(11, 13);
+FactoryMap							m_FactoryMap(3, 5);
 std::vector<uint8_t>				m_MORList;
 std::map<std::string, std::string>	m_TempBookPathRequests;
 	
@@ -37,22 +37,14 @@ int main (int argc, char **argv)
 	0--> The cell is blocked   
 	@ToDo: Automatisch erstellen lassen
 	*/
-	bool factoryMap_FreeWays[11][13] =
+	bool factoryMap_FreeWays[3][5] =
 	{
-		{ 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0 },
-		{ 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0 },
-		{ 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0 },
-		{ 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1 },
-		{ 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1 },
-		{ 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0 },
-		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
+		{ 1, 1, 1, 1, 1 },
+		{ 0, 0, 1, 0, 0 },
+		{ 1, 1, 1, 1, 1 },
 	};
 	
-	int factoryMap_IDs[11][13];
+	int factoryMap_IDs[3][5];
 	
 	std::string factoryMapLine;
 	std::ifstream factoryMapFile ("../../FactoryMap.txt");
@@ -74,9 +66,9 @@ int main (int argc, char **argv)
 		std::cout << "Unable to open FactoryMap-File"; 
 	}
 	
-	for(int row = 0; row < 11; row++) 
+	for(int row = 0; row < 3; row++) 
 	{
-		for(int column = 0; column < 13; column++) 
+		for(int column = 0; column < 5; column++) 
 		{
 			FactoryMapField field;
 			field.fieldIsFree = factoryMap_FreeWays[row][column];
