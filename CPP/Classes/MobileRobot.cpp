@@ -21,7 +21,7 @@ MobileRobot::MobileRobot(const std::string mqttHostname, const int mqttPort, con
 	: m_SerialDevice(serialDevice)
 	, m_SerialBaud(serialBaud)
 	, m_StateMachineState(0)
-	, m_ActualPositionStationID(10021)
+	, m_ActualPositionStationID(10000)
 	, m_RobotDrivesToStart(false)
 	, stationToggle(false)
 	, stateMachineState(0)
@@ -329,8 +329,18 @@ void MobileRobot::TakeTask(uint64_t taskID)
 
 bool MobileRobot::DriveAlongPath(std::vector<std::pair<int, int>> path) const
 {
-	
 	BookPath(path);
+	
+	for(int index = 0; index < path.size(); index++)
+	{
+		int stationID = m_FactoryMap->GetIDFromXYPosition(path[index].first, path[index].second);
+		
+		if(((stationID- 40000) < 10000) && ((stationID- 40000) > 0))
+		{
+			m_mqttComm.Publish("SIP40_Factory/Crossroad", "1");
+			std::cout << "Published on Crossroad: 1" << std::endl;
+		}
+	}
 	
 	std::stack<std::string> commandPathToRobot = m_FactoryMap->CreateCommandsForRobot(path);
 	std::cout << "Commands: " << std::endl;
@@ -359,6 +369,9 @@ bool MobileRobot::DriveAlongPath(std::vector<std::pair<int, int>> path) const
 		
 		FreePathAfterCheckpoint(path);
 	}
+	
+	m_mqttComm.Publish("SIP40_Factory/Crossroad", "0");
+	std::cout << "Published on Crossroad: 0" << std::endl;
 }
 
 void MobileRobot::BookPath(const std::vector<std::pair<int, int>> path) const

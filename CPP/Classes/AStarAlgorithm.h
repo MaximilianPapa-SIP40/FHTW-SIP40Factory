@@ -10,8 +10,8 @@
 #include <utility>
 #include <stack>
 
-#define ROW 11
-#define COL 13
+#define ROW 3
+#define COL 5
 
 // Creating a shortcut for int, int pair type
 typedef std::pair<int, int> Pair;
